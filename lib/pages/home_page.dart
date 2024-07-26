@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:excuse_generator/components/my_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -13,23 +12,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final GenerativeModel _model;
-  late final ChatSession _chatSession;
-
+final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
   bool isResultVisible = false;
   TextEditingController textEditingController = TextEditingController();
   String generatedResult = '';
-
   @override
-  void initState() {
-    super.initState();
-    _model = GenerativeModel(
-      model: "gemini-pro",
-      apiKey: const String.fromEnvironment('api_key'),
-    );
-    _chatSession = _model.startChat();
-  }
-
+ 
   @override
   void dispose() {
     textEditingController.dispose();
@@ -38,8 +26,16 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> generateExcuse(String input) async {
     try {
-      final content = Content(input, ContentType.text); // Create Content object
-      final response = await _chatSession.sendMessage(content);
+      if (apiKey.isEmpty) {
+        print('No \$API_KEY environment variable');
+      }
+      // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
+      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+      final content = [
+        Content.text('Generate a precise excuse for the text in less than 15 words: {$input}')
+      ];
+      final response = await model.generateContent(content);
+      print(response.text);
       setState(() {
         generatedResult = response.text ?? 'No response received';
         isResultVisible = true;
@@ -183,17 +179,18 @@ class _HomePageState extends State<HomePage> {
                 // Result box
                 Visibility(
                   visible: isResultVisible,
-                  child: IntrinsicHeight(
+                  child:  IntrinsicHeight(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      padding:  const EdgeInsets.symmetric(horizontal: 25.0),
                       child: SizedBox(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                          padding:  const EdgeInsets.symmetric(horizontal: 25.0),
                           child: Column(
                             children: [
                               Text(
+                                // 'Text generated',
                                 generatedResult,
-                                style: const TextStyle(
+                                style:  const TextStyle(
                                   fontFamily: 'Montserrat',
                                   fontSize: 16,
                                 ),
