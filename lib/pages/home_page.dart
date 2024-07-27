@@ -4,20 +4,28 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
+class Translate extends StatefulWidget {
+  const Translate({super.key});
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Translate> createState() => _TranslateState();
 }
 
-class _HomePageState extends State<HomePage> {
-final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+class _TranslateState extends State<Translate> {
+  // final String apiKey = dotenv.env['API_KEY'] ?? '';
+  //  late final GenerativeModel _model;
+  // late final ChatSession _chatSession;
   bool isResultVisible = false;
   TextEditingController textEditingController = TextEditingController();
   String generatedResult = '';
   @override
- 
+  // void initState() {
+  //   super.initState();
+  //   _model = GenerativeModel(
+  //     model: "gemini-pro",
+  //     apiKey: const String.fromEnvironment('api_key'),
+  //   );
+  //   _chatSession = _model.startChat();
+  // }
   @override
   void dispose() {
     textEditingController.dispose();
@@ -26,13 +34,17 @@ final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
   Future<void> generateExcuse(String input) async {
     try {
-      if (apiKey.isEmpty) {
-        print('No \$API_KEY environment variable');
-      }
+      // if (apiKey.isEmpty) {
+      //   print('No \$API_KEY environment variable');
+      // }
       // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
-      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+      final model = GenerativeModel(
+        model: 'gemini-1.5-flash',
+        apiKey: 'AIzaSyByl2f_YmX-d0styqSY5n_JQJ8vqWJAMsk',
+      );
       final content = [
-        Content.text('Generate a precise excuse for the text in less than 15 words: {$input}')
+        Content.text(
+            'Generate a precise and reasonable excuse for the text in less than 15 words: {$input}')
       ];
       final response = await model.generateContent(content);
       print(response.text);
@@ -56,7 +68,7 @@ final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
     void showResult() {
       generateExcuse(textEditingController.text);
-      textEditingController.clear();
+
       removeFocus();
     }
 
@@ -64,6 +76,7 @@ final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
       setState(() {
         isResultVisible = false;
         generatedResult = '';
+        textEditingController.clear();
         removeFocus();
       });
     }
@@ -71,6 +84,9 @@ final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
     return GestureDetector(
       onTap: removeFocus,
       child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+        ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: Center(
           child: SingleChildScrollView(
@@ -118,7 +134,8 @@ final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
                         ),
                       ),
                       const SizedBox(height: 5),
-                      // Powered by Gemini
+
+                      //Powered by Gemini
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -136,7 +153,7 @@ final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
                             ),
                           ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -175,22 +192,38 @@ final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
                     ],
                   ),
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 20),
+                // const Text(
+                //   'Generated Excuse:',
+                //   style: TextStyle(
+                //     fontFamily: 'Montserrat',
+                //     fontSize: 16,
+                //   ),
+                // ),
+                // const SizedBox(height: 10),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 50.0, // Space above and below the divider
+                  ),
+                ),
                 // Result box
                 Visibility(
                   visible: isResultVisible,
-                  child:  IntrinsicHeight(
+                  child: IntrinsicHeight(
                     child: Padding(
-                      padding:  const EdgeInsets.symmetric(horizontal: 25.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
                       child: SizedBox(
                         child: Padding(
-                          padding:  const EdgeInsets.symmetric(horizontal: 25.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
                           child: Column(
                             children: [
                               Text(
                                 // 'Text generated',
                                 generatedResult,
-                                style:  const TextStyle(
+                                style: const TextStyle(
                                   fontFamily: 'Montserrat',
                                   fontSize: 16,
                                 ),
